@@ -16,6 +16,7 @@ import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
 import TweetBox from './TweetBox';
+import Header from './Header';
 
 const useStyles1 = makeStyles((theme) => ({
     root: {
@@ -154,6 +155,7 @@ if (error) {
     } else {
     return (
     <div>
+        <Header p1selected="selected"/>
         <TweetBox tweetNumber={Object.keys(items).length} />
         <div style={{ width:"80%",textAlign:"center", marginLeft: "auto",marginRight: "auto",marginTop:"100px" }}>
             <TableContainer component={Paper}>
