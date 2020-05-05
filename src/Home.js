@@ -15,6 +15,7 @@ import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
+import TweetBox from './TweetBox';
 
 const useStyles1 = makeStyles((theme) => ({
     root: {
@@ -152,6 +153,8 @@ if (error) {
     return <div>Chargement...</div>;
     } else {
     return (
+    <div>
+        <TweetBox tweetNumber={Object.keys(items).length} />
         <div style={{ width:"80%",textAlign:"center", marginLeft: "auto",marginRight: "auto",marginTop:"100px" }}>
             <TableContainer component={Paper}>
                 <Table className={classes.table} aria-label="custom pagination table">
@@ -221,6 +224,7 @@ if (error) {
                 </Table>
             </TableContainer>
         </div>
+    </div>
           );
         }
       }
