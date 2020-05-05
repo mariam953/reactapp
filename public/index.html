@@ -16,7 +16,9 @@
     -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"/>
-    
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="header.css">
+  
     <!--
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.
@@ -30,29 +32,20 @@
   </head>
   <body>
     <!-- Navigation -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
-  <div class="container">
-    <a class="navbar-brand" href="#">
-          <img src="http://placehold.it/150x50?text=Logo" alt="">
-        </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-    <div class="collapse navbar-collapse" id="navbarResponsive">
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item active">
-          <a class="nav-link" href="#">Home
-                <span class="sr-only">(current)</span>
-              </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Analysis</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
+    <header class="header-fixed">
 
+      <div class="header-limiter">
+    
+        <h1><a href="#">Twitter<span>Analytics</span></a></h1>
+    
+        <nav>
+          <a href="#" class="selected" id="p1">Home</a>
+          <a href="#" id="p2">Analysis</a>
+        </nav>
+    
+      </div>
+    
+    </header>
 <!-- /.container -->
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
@@ -67,6 +60,49 @@
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
     <script href="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.slim.min.js"></script>
-    <script href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+    <script href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>    
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" >
+
+      $(document).ready(function(){
+    
+        var showHeaderAt = 150;
+    
+        var win = $(window),
+            body = $('body');
+    
+        // Show the fixed header only on larger screen devices
+    
+        if(win.width() > 400){
+    
+          // When we scroll more than 150px down, we set the
+          // "fixed" class on the body element.
+    
+          win.on('scroll', function(e){
+    
+            if(win.scrollTop() > showHeaderAt) {
+              body.addClass('fixed');
+            }
+            else {
+              body.removeClass('fixed');
+            }
+          });
+    
+        }
+
+        $("#p1").click(function() {
+        alert( "Handler for .click() called." );
+      });
+    
+      });
+
+      document.getElementById("p1").onclick = function(){
+        alert("licked");
+      }
+    
+      
+    </script>
+    
+    <!-- Demo ads. Please ignore and remove. -->
   </body>
 </html>
