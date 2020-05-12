@@ -17,6 +17,9 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
 import TweetBox from './TweetBox';
 import Header from './Header';
+import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import './css/styleerror.css';
+import './css/loading.css';
 
 const useStyles1 = makeStyles((theme) => ({
     root: {
@@ -68,9 +71,9 @@ function TablePaginationActions(props) {
     return (
     <div className={classes.root}>
         <IconButton
-        onClick={handleFirstPageButtonClick}
-        disabled={page === 0}
-        aria-label="first page"
+            onClick={handleFirstPageButtonClick}
+            disabled={page === 0}
+            aria-label="first page"
         >
         {theme.direction === 'rtl' ? <LastPageIcon /> : <FirstPageIcon />}
         </IconButton>
@@ -149,9 +152,34 @@ export default function CustomPaginationActionsTable() {
         }, [])
     
 if (error) {
-    return <div>Erreur : {error.message}</div>;
+        return(
+            <div>
+                <Header p1selected="selected"/>
+                <div id="notfound">
+                    <div class="notfound">
+                        <div class="notfound-404">
+                            <h1>Oops!</h1>
+                            <h2>Internal server error</h2>
+                        </div>
+                        <a href="/">Rechager la page</a>
+                    </div>
+                </div>  
+            </div> 
+        );
     } else if (!isLoaded) {
-    return <div>Chargement...</div>;
+    return( 
+        <div>
+            <Header p1selected="selected"/>
+            <div class="twitter-bird-animation"></div>
+            <div class="loading">
+            <span class="text">Loading</span>
+            <span class="blob1 blob"></span>
+            <span class="blob2 blob"></span>
+            <span class="blob3 blob"></span>
+            </div>
+
+        </div>
+        );
     } else {
     return (
     <div>
@@ -163,6 +191,7 @@ if (error) {
                 <TableHead>
                     <TableRow>
                         <StyledTableCell align="left">Tweet</StyledTableCell>
+                        <StyledTableCell align="left">Sentiment</StyledTableCell>
                         <StyledTableCell align="left">username </StyledTableCell>
                         <StyledTableCell align="left">likes</StyledTableCell>
                         <StyledTableCell align="left">retweets</StyledTableCell>
@@ -181,6 +210,9 @@ if (error) {
                         {row.text}
                         </StyledTableCell>
                         <StyledTableCell style={{ width: 160 }} align="left">
+                        {row.sentiment}
+                        </StyledTableCell>
+                        <StyledTableCell style={{ width: 160 }} align="left">
                         {row.username}
                         </StyledTableCell>
                         <StyledTableCell style={{ width: 160 }} align="left">
@@ -193,7 +225,7 @@ if (error) {
                         {new Date(row.timestamp).toISOString()}
                         </StyledTableCell>
                         <StyledTableCell style={{ width: 160 }} align="left">
-                        <a href={"https://www.twitter.com"+row.tweet_url} rel="noopener noreferrer" target="_blank">https://www.twitter.com/{row.tweet_url}</a>
+                        <a href={"https://www.twitter.com"+row.tweet_url} rel="noopener noreferrer" target="_blank">https://www.twitter.com{row.tweet_url}</a>
                         </StyledTableCell>
                         
                     </StyledTableRow>
