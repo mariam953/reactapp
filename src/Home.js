@@ -20,6 +20,8 @@ import Header from './Header';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import './css/styleerror.css';
 import './css/loading.css';
+import Highcharts from 'highcharts';
+import HighchartsReact from 'highcharts-react-official';
 
 const useStyles1 = makeStyles((theme) => ({
     root: {
@@ -111,18 +113,78 @@ table: {
     minWidth: 500,
 },
 });
+//highcharts js
+var today = new Date(),
+date =  today.getDate() + '/'+  (today.getMonth() + 1) + '/' + today.getFullYear() ;
+
+var options = {
+    chart: {
+        type: 'column'
+    },
+    title: {
+      text: 'Tendances du Maroc '+date
+    },
+    /*subtitle: {
+        text: 'Click the columns to view versions. Source: <a href="http://statcounter.com" target="_blank">statcounter.com</a>'
+    },*/
+    accessibility: {
+        announceNewData: {
+            enabled: true
+        }
+    },
+    xAxis: {
+        type: 'category'
+    },
+    yAxis: {
+        title: {
+            text: 'Nomber de tweets par topic'
+        }
+
+    },
+    legend: {
+        enabled: false
+    },
+    plotOptions: {
+        series: {
+            borderWidth: 0,
+            dataLabels: {
+                enabled: true,
+                format: '{point.y}'
+            }
+        }
+    },
+
+    tooltip: {
+        headerFormat: '<span style="font-size:11px">{point.name}</span><br>',
+        pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b> tweets<br/>'
+    },
+
+    series: [
+        {
+            name: "Browsers",
+            colorByPoint: true,
+            data: [
+                
+            ]
+        }
+    ]
+  }
 
 export default function CustomPaginationActionsTable() {
     const [error, setError] = useState(null);
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [items, setItems] = useState([]);
+    const [isTweetLoaded, setIsTweetLoaded] = useState(false);
+    const [isTrendLoaded, setTrendIsLoaded] = useState(false);
+    const [tweets, setTweets] = useState([]);
+    const [trends, setTrends] = useState([]);
+    const [data, setData] = useState([]);
+    
   // Remarque : le tableau vide de dépendances [] indique
   
     const classes = useStyles2();
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
   
-    const emptyRows = rowsPerPage - Math.min(rowsPerPage, items.length - page * rowsPerPage);
+    const emptyRows = rowsPerPage - Math.min(rowsPerPage, tweets.length - page * rowsPerPage);
   
     const handleChangePage = (event, newPage) => {
       setPage(newPage);
@@ -138,14 +200,39 @@ export default function CustomPaginationActionsTable() {
             .then(res => res.json())
             .then(
             (result) => {
-                setIsLoaded(true);
-                setItems(result);
+                setIsTweetLoaded(true);
+                setTweets(result);
             },
             // Remarque : il faut gérer les erreurs ici plutôt que dans
             // un bloc catch() afin que nous n’avalions pas les exceptions
             // dues à de véritables bugs dans les composants.
             (error) => {
-                setIsLoaded(true);
+                isTweetLoaded(true);
+                setError(error);
+            }
+            )
+        }, [])
+
+    
+        
+    useEffect(() => {
+        fetch("http://127.0.0.1:5000/trends")
+            .then(res => res.json())
+            .then(
+            (result) => {
+                setTrendIsLoaded(true);
+                setTrends(result);
+                
+                
+                    //console.log(data);
+
+                
+            },
+            // Remarque : il faut gérer les erreurs ici plutôt que dans
+            // un bloc catch() afin que nous n’avalions pas les exceptions
+            // dues à de véritables bugs dans les composants.
+            (error) => {
+                isTrendLoaded(true);
                 setError(error);
             }
             )
@@ -166,7 +253,7 @@ if (error) {
                 </div>  
             </div> 
         );
-    } else if (!isLoaded) {
+    } else if (!isTrendLoaded || !isTweetLoaded) {
     return( 
         <div>
             <Header p1selected="selected"/>
@@ -181,10 +268,26 @@ if (error) {
         </div>
         );
     } else {
+        var highchartdata = trends.map((row) => {
+            return {name:row.name,y:parseInt(row.tweet_volume)}
+        });
+        
+        //console.log(dd);
+        options.series[0].data = highchartdata;
+
     return (
     <div>
         <Header p1selected="selected"/>
-        <TweetBox tweetNumber={Object.keys(items).length} />
+        <div style={{display:"inline-block",verticalAlign: "top",marginTop:"70px",marginLeft:'180px'}}>
+            <TweetBox tweetNumber={Object.keys(tweets).length} />
+            <div style={{ width:"600px", display:"inline-block",verticalAlign: "top"}}>
+                <HighchartsReact
+                    highcharts={Highcharts}
+                    options={options}
+                    
+                />
+            </div>
+        </div>
         <div style={{ width:"80%",textAlign:"center", marginLeft: "auto",marginRight: "auto",marginTop:"100px" }}>
             <TableContainer component={Paper}>
                 <Table className={classes.table} aria-label="custom pagination table">
@@ -197,13 +300,12 @@ if (error) {
                         <StyledTableCell align="left">retweets</StyledTableCell>
                         <StyledTableCell align="left">timestamp</StyledTableCell>
                         <StyledTableCell align="left">tweet_url</StyledTableCell>
-                        
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {(rowsPerPage > 0
-                    ? items.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    : items
+                    ? tweets.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    : tweets
                     ).map((row) => (
                     <StyledTableRow key={row.username}>
                         <StyledTableCell component="th" scope="row">
@@ -242,7 +344,7 @@ if (error) {
                     <TablePagination
                         rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
                         colSpan={3}
-                        count={items.length}
+                        count={tweets.length}
                         rowsPerPage={rowsPerPage}
                         page={page}
                         SelectProps={{
