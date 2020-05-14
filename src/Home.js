@@ -15,13 +15,13 @@ import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
-import TweetBox from './TweetBox';
 import Header from './Header';
-import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
-import './css/styleerror.css';
+import '../node_modules/bootstrap/dist/css/bootstrap.css';
 import './css/loading.css';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import NotFound from './NotFound'
+
 
 const useStyles1 = makeStyles((theme) => ({
     root: {
@@ -114,15 +114,16 @@ table: {
 },
 });
 //highcharts js
-var today = new Date(),
-date =  today.getDate() + '/'+  (today.getMonth() + 1) + '/' + today.getFullYear() ;
+var today = new Date();
+var t = new Date( today.getTime() );
+//var formatted = t.format("dd.mm.yyyy hh:MM:ss");
 
 var options = {
     chart: {
         type: 'column'
     },
     title: {
-      text: 'Tendances du Maroc '+date
+      text: '<b>USA</b> Trending topic for '+t.toISOString().replace('T',' ').replace('Z','')
     },
     /*subtitle: {
         text: 'Click the columns to view versions. Source: <a href="http://statcounter.com" target="_blank">statcounter.com</a>'
@@ -168,7 +169,7 @@ var options = {
             ]
         }
     ]
-  }
+  };
 
 export default function CustomPaginationActionsTable() {
     const [error, setError] = useState(null);
@@ -176,8 +177,42 @@ export default function CustomPaginationActionsTable() {
     const [isTrendLoaded, setTrendIsLoaded] = useState(false);
     const [tweets, setTweets] = useState([]);
     const [trends, setTrends] = useState([]);
-    const [data, setData] = useState([]);
-    
+    const options2= {
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false,
+            type: 'pie'
+        },
+        title: {
+            text: ''
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        accessibility: {
+            point: {
+                valueSuffix: '%'
+            }
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                }
+            }
+        },
+        series: [{
+            name: 'Brands',
+            colorByPoint: true,
+            data: []
+        }]
+        }
+        
+            
   // Remarque : le tableau vide de dépendances [] indique
   
     const classes = useStyles2();
@@ -207,7 +242,6 @@ export default function CustomPaginationActionsTable() {
             // un bloc catch() afin que nous n’avalions pas les exceptions
             // dues à de véritables bugs dans les composants.
             (error) => {
-                isTweetLoaded(true);
                 setError(error);
             }
             )
@@ -222,17 +256,11 @@ export default function CustomPaginationActionsTable() {
             (result) => {
                 setTrendIsLoaded(true);
                 setTrends(result);
-                
-                
-                    //console.log(data);
-
-                
             },
             // Remarque : il faut gérer les erreurs ici plutôt que dans
             // un bloc catch() afin que nous n’avalions pas les exceptions
             // dues à de véritables bugs dans les composants.
             (error) => {
-                isTrendLoaded(true);
                 setError(error);
             }
             )
@@ -243,13 +271,7 @@ if (error) {
             <div>
                 <Header p1selected="selected"/>
                 <div id="notfound">
-                    <div class="notfound">
-                        <div class="notfound-404">
-                            <h1>Oops!</h1>
-                            <h2>Internal server error</h2>
-                        </div>
-                        <a href="/">Rechager la page</a>
-                    </div>
+                    <NotFound/>
                 </div>  
             </div> 
         );
@@ -268,38 +290,103 @@ if (error) {
         </div>
         );
     } else {
+
         var highchartdata = trends.map((row) => {
             return {name:row.name,y:parseInt(row.tweet_volume)}
         });
-        
-        //console.log(dd);
-        options.series[0].data = highchartdata;
 
+        var arrayLength = tweets.length;
+
+        var piechartdata = [
+            {
+                name: 'Positive',
+                color:'#ff9800',
+                y: 0,
+                sliced: true,
+            }, {
+                name: 'Negative',
+                color:'#e51c23',
+                y: 0,
+                sliced: true,
+            }, {
+                name: 'Neutral',
+                color:'#2196f3',
+                y: 0,
+                sliced: true,
+            }
+        ];
+
+        for (var i = 0; i < arrayLength; i++) {
+            var sentiment =  parseFloat(tweets[i]['sentiment'][0]);
+            switch(true) {
+                case (sentiment>0):
+                  // code block
+                  piechartdata[0].y = piechartdata[0].y +1;
+                  //console.log("positive");
+                  break;
+                case (sentiment<0):
+                  // code block
+                  piechartdata[1].y++;
+                  //console.log("negative");
+                  break;
+                default:
+                    piechartdata[2].y++;
+                    //console.log("neutral");
+
+              }
+            //Do something
+        }
+
+        var total = parseFloat(piechartdata[0].y+piechartdata[1].y+piechartdata[2].y);
+
+        /*for (i = 0; i < 3; i++) {
+            piechartdata[i].y=piechartdata[i].y*100/total;
+            console.log(typeof(parseFloat(piechartdata[i].y)*100/total))
+        }*/
+
+        //console.log(dd);*100/c
+        options.series[0].data = highchartdata;
+        options2.series[0].data = piechartdata;
+        options2.title.text = 'Sentimen Analysis for top trending topic <b>'+trends[0].name+'</b>';
+
+    
     return (
     <div>
         <Header p1selected="selected"/>
         <div style={{display:"inline-block",verticalAlign: "top",marginTop:"70px",marginLeft:'180px'}}>
-            <TweetBox tweetNumber={Object.keys(tweets).length} />
-            <div style={{ width:"600px", display:"inline-block",verticalAlign: "top"}}>
+            <div style={{ width:"700px", display:"inline-block",verticalAlign: "top"}}>
                 <HighchartsReact
                     highcharts={Highcharts}
                     options={options}
                     
                 />
             </div>
+            <div style={{ marginLeft:'120px',width:"600px",display:"inline-block",verticalAlign: "top"}}>
+                <HighchartsReact
+                    highcharts={Highcharts}
+                    options={options2}
+                    
+                />
+            </div>
+        
         </div>
-        <div style={{ width:"80%",textAlign:"center", marginLeft: "auto",marginRight: "auto",marginTop:"100px" }}>
+        <div className="alert alert-warning" role="alert" style={{width:"1500px",lineHeight:"50px",margin:"auto",marginTop:"50px",fontSize:"20px"}}>
+            Analyzed tweets for <b>{trends[0].name}</b>
+        </div>
+        
+        <div style={{ width:"83%",textAlign:"center", marginLeft: "auto",marginRight: "auto",marginTop:"50px" }}>
             <TableContainer component={Paper}>
                 <Table className={classes.table} aria-label="custom pagination table">
                 <TableHead>
                     <TableRow>
                         <StyledTableCell align="left">Tweet</StyledTableCell>
                         <StyledTableCell align="left">Sentiment</StyledTableCell>
-                        <StyledTableCell align="left">username </StyledTableCell>
-                        <StyledTableCell align="left">likes</StyledTableCell>
-                        <StyledTableCell align="left">retweets</StyledTableCell>
-                        <StyledTableCell align="left">timestamp</StyledTableCell>
-                        <StyledTableCell align="left">tweet_url</StyledTableCell>
+                        <StyledTableCell align="left">Score</StyledTableCell>
+                        <StyledTableCell align="left">Username </StyledTableCell>
+                        <StyledTableCell align="left">Likes</StyledTableCell>
+                        <StyledTableCell align="left">Retweets</StyledTableCell>
+                        <StyledTableCell align="left">Posted At</StyledTableCell>
+                        <StyledTableCell align="left">Tweet Link</StyledTableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -308,11 +395,30 @@ if (error) {
                     : tweets
                     ).map((row) => (
                     <StyledTableRow key={row.username}>
-                        <StyledTableCell component="th" scope="row">
+                        <StyledTableCell component="th" scope="row" style={{ width: '260px' }} >
                         {row.text}
                         </StyledTableCell>
+                        <StyledTableCell align="left">
+                            {
+                                row.sentiment[0]>0 && <span className="badge badge-pill badge-warning">Positive</span>
+                            }
+                            {
+                                row.sentiment[0]<0 && <span className="badge badge-pill badge-danger">Negative</span>
+                            }
+                            {
+                                parseFloat(row.sentiment[0])===0 && <span className="badge badge-pill badge-primary">Neutral</span>
+                            }
+                        </StyledTableCell>
                         <StyledTableCell style={{ width: 160 }} align="left">
-                        {row.sentiment}
+                            {
+                                row.sentiment[0]>0 && <span className="badge badge-pill badge-warning">{row.sentiment[0]}</span>
+                            }
+                            {
+                                row.sentiment[0]<0 && <span className="badge badge-pill badge-danger">{row.sentiment[0]}</span>
+                            }
+                            {
+                                parseFloat(row.sentiment[0])===0 && <span className="badge badge-pill badge-primary">{row.sentiment[0]}</span>
+                            }
                         </StyledTableCell>
                         <StyledTableCell style={{ width: 160 }} align="left">
                         {row.username}
@@ -327,7 +433,7 @@ if (error) {
                         {new Date(row.timestamp).toISOString()}
                         </StyledTableCell>
                         <StyledTableCell style={{ width: 160 }} align="left">
-                        <a href={"https://www.twitter.com"+row.tweet_url} rel="noopener noreferrer" target="_blank">https://www.twitter.com{row.tweet_url}</a>
+                        <a href={"https://www.twitter.com"+row.tweet_url} rel="noopener noreferrer" target="_blank"><button type="button" class="btn btn-link">Link</button></a>
                         </StyledTableCell>
                         
                     </StyledTableRow>
