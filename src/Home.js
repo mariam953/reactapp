@@ -346,7 +346,12 @@ if (error) {
         //console.log(dd);*100/c
         options.series[0].data = highchartdata;
         options2.series[0].data = piechartdata;
-        options2.title.text = 'Sentimen Analysis for top trending topic <b>'+trends[0].name+'</b>';
+        
+        
+        if(trends[0] != undefined)
+            options2.title.text = 'Sentimen Analysis for top trending topic <b>'+trends[0].name+'</b>';
+else
+options2.title.text = 'Sentimen Analysis for top trending topic';
 
     
     return (
@@ -370,7 +375,7 @@ if (error) {
         
         </div>
         <div className="alert alert-warning" role="alert" style={{width:"1500px",lineHeight:"50px",margin:"auto",marginTop:"50px",fontSize:"20px"}}>
-            Analyzed tweets for <b>{trends[0].name}</b>
+            Analyzed tweets for <b>{trends[0] != undefined && trends[0].name}</b>
         </div>
         
         <div style={{ width:"83%",textAlign:"center", marginLeft: "auto",marginRight: "auto",marginTop:"50px" }}>
