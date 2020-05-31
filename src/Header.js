@@ -3,12 +3,12 @@ import React from 'react';
 class TweetBox extends React.Component {
     render() {
       return(
-        <header class="header-fixed">
-            <div class="header-limiter">
+        <header className="header-fixed">
+            <div className="header-limiter">
             <h1><a href="/">Twitter<span>Analytics</span></a></h1>
             <nav>
-                <a href="/Home" class={this.props.p1selected}>Home</a>
-                <a href="/analysis" class={this.props.p2selected}>Analysis</a>
+                <a href="/Home" className={this.props.p1selected}>Home</a>
+                <a href="/analysis" className={this.props.p2selected}>Analysis</a>
             </nav>
             </div>
         </header>        

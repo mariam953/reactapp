@@ -15,12 +15,32 @@ import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import { useHistory } from "react-router-dom";
+
 import Header from './Header';
 import '../node_modules/bootstrap/dist/css/bootstrap.css';
 import './css/loading.css';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import NotFound from './NotFound'
+
+
+
+//for dropdown menu
+const useStyles = makeStyles((theme) => ({
+    formControl: {
+      margin: theme.spacing(1),
+      width: '500px',
+    },
+    selectEmpty: {
+      marginTop: theme.spacing(5),
+    },
+  }));
 
 
 const useStyles1 = makeStyles((theme) => ({
@@ -109,9 +129,9 @@ TablePaginationActions.propTypes = {
   };
 
 const useStyles2 = makeStyles({
-table: {
-    minWidth: 500,
-},
+    table: {
+        minWidth: 500,
+    },
 });
 //highcharts js
 var today = new Date();
@@ -172,11 +192,32 @@ var options = {
   };
 
 export default function CustomPaginationActionsTable() {
+    //set serach date
+    var historic=''
+    
+    if(window.location.search.split('?')[1] !== undefined)
+    {
+        historic=window.location.search.split('?')[1].replace('%20',' ');
+    }else
+        historic = ''
+        
+    
+
     const [error, setError] = useState(null);
     const [isTweetLoaded, setIsTweetLoaded] = useState(false);
     const [isTrendLoaded, setTrendIsLoaded] = useState(false);
+    const [isHistoricLoaded, setisHistoricLoaded] = useState(false);
     const [tweets, setTweets] = useState([]);
+    const [historic_tweets, setHistoricTweets] = useState([]);
     const [trends, setTrends] = useState([]);
+    //for drop down menu
+    const [t_date, sett_date] = React.useState('');
+    const handleChange = (event) => {
+        sett_date(event.target.value);
+        console.log(t_date)
+        
+      };
+
     const options2= {
         chart: {
             plotBackgroundColor: null,
@@ -212,9 +253,7 @@ export default function CustomPaginationActionsTable() {
         }]
         }
         
-            
-  // Remarque : le tableau vide de dépendances [] indique
-  
+    
     const classes = useStyles2();
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -231,7 +270,29 @@ export default function CustomPaginationActionsTable() {
     };
 
     useEffect(() => {
-        fetch("http://127.0.0.1:5000/tweets")
+        fetch("http://localhost:5000/tweets/historic")
+            .then(res => res.json())
+            .then(
+            (result) => {
+                setisHistoricLoaded(true);
+                result=result.sort(function(a,b){
+                    // Turn your strings into dates, and then subtract them
+                    // to get a value that is either negative, positive, or zero.
+                    return Date.parse(b) - Date.parse(a);
+                  });
+                setHistoricTweets(result);
+            },
+            // Remarque : il faut gérer les erreurs ici plutôt que dans
+            // un bloc catch() afin que nous n’avalions pas les exceptions
+            // dues à de véritables bugs dans les composants.
+            (error) => {
+                setError(error);
+            }
+            )
+        }, [])
+
+    useEffect(() => {
+        fetch("http://localhost:5000/tweets/"+historic)
             .then(res => res.json())
             .then(
             (result) => {
@@ -245,11 +306,11 @@ export default function CustomPaginationActionsTable() {
                 setError(error);
             }
             )
-        }, [])
+        }, [])    
 
         
     useEffect(() => {
-        fetch("http://127.0.0.1:5000/trends")
+        fetch("http://127.0.0.1:5000/trends/"+historic)
             .then(res => res.json())
             .then(
             (result) => {
@@ -274,21 +335,23 @@ if (error) {
                 </div>  
             </div> 
         );
-    } else if (!isTrendLoaded || !isTweetLoaded) {
+    } else if (!isTrendLoaded || !isTweetLoaded || !isHistoricLoaded) {
     return( 
         <div>
             <Header p1selected="selected"/>
-            <div class="twitter-bird-animation"></div>
-            <div class="loading">
-            <span class="text">Loading</span>
-            <span class="blob1 blob"></span>
-            <span class="blob2 blob"></span>
-            <span class="blob3 blob"></span>
+            <div className="twitter-bird-animation"></div>
+            <div className="loading">
+            <span className="text">Loading</span>
+            <span className="blob1 blob"></span>
+            <span className="blob2 blob"></span>
+            <span className="blob3 blob"></span>
             </div>
 
         </div>
         );
     } else {
+
+        console.log(historic_tweets);
 
         var highchartdata = trends.map((row) => {
             return {name:row.name,y:parseInt(row.tweet_volume)}
@@ -336,19 +399,12 @@ if (error) {
             //Do something
         }
 
-        var total = parseFloat(piechartdata[0].y+piechartdata[1].y+piechartdata[2].y);
-
-        /*for (i = 0; i < 3; i++) {
-            piechartdata[i].y=piechartdata[i].y*100/total;
-            console.log(typeof(parseFloat(piechartdata[i].y)*100/total))
-        }*/
-
-        //console.log(dd);*100/c
+        
         options.series[0].data = highchartdata;
         options2.series[0].data = piechartdata;
         
         
-        if(trends[0] != undefined)
+        if(trends[0] !== undefined)
             options2.title.text = 'Sentimen Analysis for top trending topic <b>'+trends[0].name+'</b>';
 else
 options2.title.text = 'Sentimen Analysis for top trending topic';
@@ -357,6 +413,24 @@ options2.title.text = 'Sentimen Analysis for top trending topic';
     return (
     <div>
         <Header p1selected="selected"/>
+        
+        
+        <div className="alert alert-primary" role="alert" style={{width:"1500px",lineHeight:"50px",margin:"auto",marginTop:"50px",fontSize:"20px"}}>    
+            <FormControl className={classes.formControl} style={{width:"700px",lineHeight:"50px",margin:"auto",fontSize:"20px"}}>
+                <InputLabel id="demo-simple-select-label">Get historic tweets for</InputLabel>
+                <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={t_date}
+                    onChange={event =>  window.location.href='?'+event.target.value}
+                >
+                    {(historic_tweets).map((row) => (
+                        <MenuItem value={row}>{row}</MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+      </div>
+
         <div style={{display:"inline-block",verticalAlign: "top",marginTop:"70px",marginLeft:'180px'}}>
             <div style={{ width:"700px", display:"inline-block",verticalAlign: "top"}}>
                 <HighchartsReact
@@ -375,7 +449,7 @@ options2.title.text = 'Sentimen Analysis for top trending topic';
         
         </div>
         <div className="alert alert-warning" role="alert" style={{width:"1500px",lineHeight:"50px",margin:"auto",marginTop:"50px",fontSize:"20px"}}>
-            Analyzed tweets for <b>{trends[0] != undefined && trends[0].name}</b>
+            Analyzed tweets for <b>{trends[0] !== undefined && trends[0].name}</b>
         </div>
         
         <div style={{ width:"83%",textAlign:"center", marginLeft: "auto",marginRight: "auto",marginTop:"50px" }}>
@@ -437,7 +511,7 @@ options2.title.text = 'Sentimen Analysis for top trending topic';
                         {new Date(row.timestamp).toISOString()}
                         </StyledTableCell>
                         <StyledTableCell style={{ width: 160 }} align="left">
-                        <a href={"https://www.twitter.com"+row.tweet_url} rel="noopener noreferrer" target="_blank"><button type="button" class="btn btn-link">Link</button></a>
+                        <a href={"https://www.twitter.com"+row.tweet_url} rel="noopener noreferrer" target="_blank"><button type="button" className="btn btn-link">Link</button></a>
                         </StyledTableCell>
                         
                     </StyledTableRow>

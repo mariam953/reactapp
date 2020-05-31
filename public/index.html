@@ -62,47 +62,5 @@
     <script href="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.slim.min.js"></script>
     <script href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>    
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
-    <script type="text/javascript" >
-
-      $(document).ready(function(){
-    
-        var showHeaderAt = 150;
-    
-        var win = $(window),
-            body = $('body');
-    
-        // Show the fixed header only on larger screen devices
-    
-        if(win.width() > 400){
-    
-          // When we scroll more than 150px down, we set the
-          // "fixed" class on the body element.
-    
-          win.on('scroll', function(e){
-    
-            if(win.scrollTop() > showHeaderAt) {
-              body.addClass('fixed');
-            }
-            else {
-              body.removeClass('fixed');
-            }
-          });
-    
-        }
-
-        $("#p1").click(function() {
-        alert( "Handler for .click() called." );
-      });
-    
-      });
-
-      document.getElementById("p1").onclick = function(){
-        alert("licked");
-      }
-    
-      
-    </script>
-    
-    <!-- Demo ads. Please ignore and remove. -->
   </body>
 </html>
